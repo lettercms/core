@@ -1,11 +1,11 @@
 import { Test, type TestingModule } from '@nestjs/testing';
-import { PrismaService } from '../prisma.service';
+//import { PrismaService } from '../prisma.service';
 import { PostsService } from './posts.service';
 import { PrismaModule } from '../prisma.module';
 
 describe('PostsService', () => {
   let service: PostsService;
-  let prisma: PrismaService;
+  //let prisma: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -14,7 +14,7 @@ describe('PostsService', () => {
     }).compile();
 
     service = module.get<PostsService>(PostsService);
-    prisma = module.get<PrismaService>(PrismaService);
+    //prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {
@@ -23,7 +23,7 @@ describe('PostsService', () => {
 
   it('should get the first job for "steve"', async () => {
     //Use `jest.fn()` to mock the specific Prisma function that is used in the function under test (`getFirstJob()`). This will cause the next call to `prisma.name.findMany()` to return the data we've provided. The actual database won't be accessed.
-    const now = new Date();
+    //const now = new Date();
 
     /*prisma.post.findMany = jest.fn().mockReturnValueOnce([
 			{
