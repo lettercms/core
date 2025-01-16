@@ -1,0 +1,17 @@
+services:
+  core:
+    depends_on:
+      redis:
+        condition: service_started
+    image: davidsdevel/lettercms-core:dev
+    restart: always
+    ports:
+      - "3002:3000"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL
+      - JWT_SECRET
+  redis:
+    image: redis:alpine
+    restart: always

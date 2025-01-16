@@ -1,0 +1,104 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String  @id @unique @default(cuid())
+  name           String
+  lastname       String
+  descriptions   String?
+  ocupation      String?
+  role           Role    @default(ADMIN)
+  profilePicture String
+  verified       Boolean  @default(false)
+  email          String  @unique
+  password       String?
+  website        String?
+  facebook       String?
+  twitter        String?
+  instagram      String?
+  linkedin       String?
+  Blog           Blog[]
+  Post           Post[]
+}
+
+model Blog {
+  id              String   @id @unique @default(cuid())
+  subdomain       String   @unique
+  custonDomain    String?
+  isVisible       Boolean  @default(false)
+  hasCustomRobots Boolean  @default(false)
+  robots          String?
+  created         DateTime @default(now())
+  owner           User  @relation(fields: [userId], references: [id])
+  title           String
+  users           Int     @default(0)
+  posts           Int     @default(0)
+  description     String?
+  thumbnail       String
+  keys            Json[]
+  userId          String
+  Post            Post[]
+  Views            View[]
+}
+
+model Post {
+  id          String     @unique @default(cuid())
+  blog        Blog       @relation(fields: [blogId], references: [id])
+  title       String?
+  description String?
+  tags        String[]
+  category    String?
+  content     String?
+  text        String?
+  created     DateTime    @default(now())
+  published   DateTime?
+  updated     DateTime?
+  author      User        @relation(fields: [userId], references: [id])
+  status      PostStatus  @default(DRAFTED)
+  images      String[]
+  thumbnail   String?
+  slug        String?
+  views       Int         @default(0)
+  protected   Boolean     @default(false)
+  blogId      String
+  userId      String
+}
+
+model View {
+  id            String      @unique @default(cuid())
+  blog          Blog        @relation(fields: [blogId], references: [id])
+  source        String      @default("direct")
+  slug          String
+  country       String
+  created       DateTime        @default(now())
+  //city          String
+  //region        String
+  browser       String
+  platform      String
+  device        String
+  blogId        String
+}
+
+enum Role {
+  ADMIN
+  COLLABORATOR
+}
+
+enum PostStatus {
+  PUBLISHED
+  DRAFTED
+  IMPORTED
+}
