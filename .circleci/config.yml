@@ -1,10 +1,10 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.0.2
+  node: circleci/node@7.0.0
 
 jobs:
-  deploy:
+  deploy-ec2:
     executor: node/default
     steps:
       - checkout
@@ -16,12 +16,13 @@ jobs:
       - run: echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
       - run: docker build -t $DOCKER_USER/lettercms-core:latest .
       - run: docker push $DOCKER_USER/lettercms-core:latest
+      - run: ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
       - run: ssh $SSH_USER@$SSH_HOST "cd lettercms && docker compose pull core && docker compose up -d"
 
 workflows:
   deploy:
     jobs:
-      - deploy:
+      - deploy-ec2:
           filters:
             branches:
-              only: main
+              only: production
