@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PostsService } from 'src/posts/posts.service';
 import { PrismaService } from 'src/prisma.service';
+import * as countries from 'i18n-iso-countries';
 
 @Injectable()
 export class ViewsService {
@@ -142,13 +143,25 @@ export class ViewsService {
       }
 
       data.browsers[e.browser] += 1;
-      data.countries[e.country] = +1;
+      data.countries[e.country] += 1;
       data.devices[e.device] += 1;
       data.sources[e.source] += 1;
       data.slugs[e.slug] += 1;
       data.dates[dateString] += 1;
       data.days[dayString] += 1;
       data.hours[hourString] += 1;
+    });
+
+    data.countries = Object.entries(data.countries).map(([code, views]) => {
+      const alpha3 = countries.alpha2ToAlpha3(code) ?? 'Unknown';
+      const name = countries.getName(code, 'es') ?? 'Unknown';
+
+      return {
+        alpha3,
+        views,
+        name,
+        code,
+      };
     });
 
     return data;

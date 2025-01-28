@@ -9,8 +9,9 @@ import {
   Request,
 } from '@nestjs/common';
 import { ViewsService } from './views.service';
-import { getName as getCountryName } from 'i18n-iso-countries';
 import { UserSessionEntity } from 'src/auth/entities/auth.entity';
+import { Country } from 'src/commons/decorators/country';
+import { UserAgent } from 'src/commons/decorators/user-agent';
 
 @Controller('views')
 export class ViewsController {
@@ -20,11 +21,9 @@ export class ViewsController {
   setView(
     @Request() req,
     @Param('slug') slug: string,
-    @Headers('cf-ipcountry') countryHeader: string,
-    @Headers('sec-ch-ua-mobile') mobileHeader: string,
-    @Headers('sec-ch-ua-platform') platformHeader: string,
-    @Headers('sec-ch-ua') uaHeader: string,
     @Headers('referer') referer: string,
+    @Country() country,
+    @UserAgent() userAgent,
   ) {
     const session = req.user as UserSessionEntity;
 
@@ -32,23 +31,11 @@ export class ViewsController {
       throw new BadRequestException('Missing Blog ID');
     }
 
-    const country = countryHeader
-      ? getCountryName(countryHeader, 'en')
-      : 'Unknown';
+    //TODO: Improve device data collection
+    const device = userAgent.device.type === 'mobile' ? 'mobile' : 'desktop';
 
-    const device = !mobileHeader
-      ? 'Unknown'
-      : mobileHeader === '?0'
-        ? 'desktop'
-        : 'mobile';
-
-    const platform = platformHeader
-      ? platformHeader.replace(/"|'/g, '')
-      : 'Unknown';
-
-    const browser = uaHeader
-      ? uaHeader.replace(/'|"/g, '').split(', ')[1].split(';')[0]
-      : 'Unknown';
+    const platform = userAgent.os.name ?? 'Unknown';
+    const browser = userAgent.browser.name ?? 'Unknown';
 
     return this.viewsService.registerView(
       session.blog,
@@ -76,8 +63,6 @@ export class ViewsController {
     if (end) {
       end = +end;
     }
-
-    console.log(start, end);
 
     return this.viewsService.getViews(session.blog, start, end);
   }

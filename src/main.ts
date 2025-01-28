@@ -14,8 +14,8 @@ async function bootstrap() {
   app.enableCors();
 
   const config = new DocumentBuilder()
-    .setTitle('Median')
-    .setDescription('The Median API description')
+    .setTitle('LetterCMS')
+    .setDescription('LetterCMS API description')
     .setVersion('0.1')
     .build();
 
