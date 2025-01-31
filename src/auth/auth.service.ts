@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { GmailDto } from './dto/gmail.dto';
 import { LoginDto } from './dto/login.dto';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -18,7 +19,12 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    if (user.password !== loginDto.password) {
+    const matchPassword = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
+
+    if (matchPassword) {
       throw new UnauthorizedException();
     }
 
