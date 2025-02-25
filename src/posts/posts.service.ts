@@ -77,6 +77,9 @@ export class PostsService {
           },
         ],
       },
+      include: {
+        author: true,
+      },
     });
   }
 

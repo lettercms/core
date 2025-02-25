@@ -27,6 +27,18 @@ export class BlogsService {
     });
   }
 
+  findExternalsBlogs(userId: string) {
+    return this.prisma.blog.findMany({
+      where: {
+        collaborators: {
+          some: {
+            userId,
+          },
+        },
+      },
+    });
+  }
+
   findOne(id: string, userId: string) {
     return this.prisma.blog.findUnique({
       where: {
@@ -36,8 +48,26 @@ export class BlogsService {
     });
   }
 
-  update(id: string, updateBlogDto: UpdateBlogDto) {
-    return `This action updates a #${id} blog ${JSON.stringify(updateBlogDto)}`;
+  incrementVisits(id: string) {
+    return this.prisma.blog.update({
+      where: {
+        id,
+      },
+      data: {
+        visits: {
+          increment: 1,
+        },
+      },
+    });
+  }
+
+  update(id: string, data: UpdateBlogDto) {
+    return this.prisma.blog.update({
+      where: {
+        id,
+      },
+      data,
+    });
   }
 
   remove(id: string) {

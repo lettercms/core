@@ -13,12 +13,12 @@ export class ImagesController {
   constructor(private readonly imagesService: ImagesService) {}
 
   @Get('search')
-  search(@Query('q') q: string, @Query('page') page: string = '1') {
+  search(@Query('q') q: string, @Query('page') page?: string) {
     if (!q) {
       throw new BadRequestException('Query must be defined');
     }
 
-    return this.imagesService.searchImages(q, page);
+    return this.imagesService.searchImages(q, page || '1');
   }
 
   @Post('track')

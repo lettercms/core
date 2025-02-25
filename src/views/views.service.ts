@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { PostsService } from 'src/posts/posts.service';
 import { PrismaService } from 'src/prisma.service';
 import * as countries from 'i18n-iso-countries';
+import { BlogsService } from 'src/blogs/blogs.service';
 
 @Injectable()
 export class ViewsService {
   constructor(
     private prisma: PrismaService,
     private postService: PostsService,
+    private blogService: BlogsService,
   ) {}
   async registerView(
     blog: string,
@@ -18,23 +20,25 @@ export class ViewsService {
     browser: string,
     platform: string,
   ) {
-    await this.postService.incrementView(blog, slug);
-
-    await this.prisma.view.create({
-      data: {
-        source,
-        browser,
-        country,
-        slug,
-        platform,
-        device,
-        blog: {
-          connect: {
-            id: blog,
+    await Promise.all([
+      this.postService.incrementView(blog, slug),
+      this.blogService.incrementVisits(blog),
+      this.prisma.view.create({
+        data: {
+          source,
+          browser,
+          country,
+          slug,
+          platform,
+          device,
+          blog: {
+            connect: {
+              id: blog,
+            },
           },
         },
-      },
-    });
+      }),
+    ]);
 
     return {
       status: 'OK',
@@ -49,15 +53,26 @@ export class ViewsService {
     if (!end) {
       end = Date.now();
     }
+    const { visits } = await this.prisma.blog.findUnique({
+      where: {
+        id: blog,
+      },
+      select: {
+        visits: true,
+      },
+    });
 
     const { dateEnd, dateStart, diff } = this.generateRanges(start, end);
 
     const dates = this.generateDates(diff, dateEnd - 1000 * 60 * 60 * 24);
 
     const data = {
+      blogVisits: visits,
+      total: 0,
       countries: {},
       devices: {},
       browsers: {},
+      platforms: {},
       slugs: {},
       hours: {
         '1AM': 0,
@@ -108,6 +123,8 @@ export class ViewsService {
       },
     });
 
+    data.total = views.length;
+
     views.forEach((e) => {
       const dateString = this.getDateString(e.created);
       const dayString = this.getWeekDay(e.created);
@@ -129,6 +146,10 @@ export class ViewsService {
       if (!data.browsers[e.browser]) {
         data.browsers[e.browser] = 0;
       }
+
+      if (!data.platforms[e.platform]) {
+        data.platforms[e.platform] = 0;
+      }
       if (!data.countries[e.country]) {
         data.countries[e.country] = 0;
       }
@@ -143,6 +164,7 @@ export class ViewsService {
       }
 
       data.browsers[e.browser] += 1;
+      data.platforms[e.platform] += 1;
       data.countries[e.country] += 1;
       data.devices[e.device] += 1;
       data.sources[e.source] += 1;

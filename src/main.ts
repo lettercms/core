@@ -12,6 +12,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(new LoggerErrorInterceptor());
 
   app.enableCors();
+  app.getHttpAdapter().getInstance().disable('x-powered-by');
 
   const config = new DocumentBuilder()
     .setTitle('LetterCMS')

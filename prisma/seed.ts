@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcrypt'
 
 // initialize Prisma Client
 const prisma = new PrismaClient();
@@ -13,12 +14,12 @@ async function main() {
 		create: {
 			email: 'davidsdevel@gmail.com',
 			name: 'David',
-			password: '1234',
+			password: await bcrypt.hash('1234', 10),
 			lastname: 'Gonzalez',
 			profilePicture: 'https://avatar.tobi.sh/David+Gonzalez.svg',
 		},
 	});
-
+	
 	const blog = await prisma.blog.upsert({
 		where: {
 			subdomain: 'davidsdevel',
@@ -28,12 +29,39 @@ async function main() {
 			subdomain: 'davidsdevel',
 			thumbnail:
 				'https://cdn.jsdelivr.net/gh/lettercms/lettercms/apps/cdn/images/og-template.png',
-			title: "David's Devel",
+			title: "David's Devel - Blog",
 			userId: account.id,
+			visits: 1,
+			users: 2
 		},
 	});
 
-	const post = await prisma.post.create({
+	await prisma.user.upsert({
+		where: {
+			email: 'lettercms@gmail.com',
+		},
+		update: {},
+		create: {
+			email: 'lettercms@gmail.com',
+			name: 'Juan',
+			lastname: 'Smith',
+			password: await bcrypt.hash('1234', 10),
+			profilePicture: 'https://avatar.tobi.sh/Juan+Smith.svg',
+			externalBlogs: {
+				create: [
+					{
+						blog: {
+							connect: {
+								id: blog.id,
+							},
+						}
+					}
+				]
+			}
+		},
+	});
+
+	await prisma.post.create({
 		data: {
 			userId: account.id,
 			blogId: blog.id,
@@ -46,18 +74,26 @@ async function main() {
 		},
 	});
 
-	const view = await prisma.view.create({
+	await prisma.invitation.create({
+		data: {
+			email: 'djgm1206@gmail.com',
+			blogId: blog.id,
+			senderId: account.id,
+			expiresIn: new Date(Date.now() + (1000 * 60 * 60 * 24 * 365)),
+		},
+	});
+
+	await prisma.view.create({
 		data: {
 			browser: 'Chrome',
-			country: 'Venezuela',
-			device: 'Desktop',
+			country: 'VE',
+			device: 'desktop',
 			platform: 'Windows',
 			source: 'direct',
 			slug: 'demo-post',
 			blogId: blog.id,
 		}
 	})
-
 
 	console.log('Done...');
 }

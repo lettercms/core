@@ -1,0 +1,44 @@
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
+
+@Injectable()
+export class InvitationsService {
+  constructor(private prisma: PrismaService) {}
+  async inviteBlogMember(email: string, blogId: string, senderId: string) {
+    const expireIn = Date.now() + 1000 * 60 * 60 * 24; //Expires in 1 day
+
+    //TODO: Send invitation via Email
+
+    return this.prisma.invitation.create({
+      data: {
+        senderId,
+        email,
+        blogId,
+        expiresIn: new Date(expireIn),
+      },
+    });
+  }
+
+  findOne(id: string) {
+    return this.prisma.invitation.findUnique({
+      where: {
+        id,
+        expiresIn: {
+          gt: new Date(),
+        },
+      },
+      include: {
+        sender: true,
+        blog: true,
+      },
+    });
+  }
+
+  update(id: number) {
+    return `This action updates a #${id} invitation`;
+  }
+
+  remove(id: number) {
+    return `This action removes a #${id} invitation`;
+  }
+}

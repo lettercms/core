@@ -15,72 +15,87 @@ datasource db {
 }
 
 model User {
-  id             String  @id @unique @default(cuid())
-  name           String
-  lastname       String
-  descriptions   String?
-  ocupation      String?
-  role           Role    @default(ADMIN)
-  profilePicture String
-  verified       Boolean  @default(false)
-  email          String  @unique
-  password       String?
-  website        String?
-  facebook       String?
-  twitter        String?
-  instagram      String?
-  linkedin       String?
-  Blog           Blog[]
-  Post           Post[]
+  id              String                  @id @unique @default(cuid())
+  name            String
+  lastname        String
+  description     String?
+  ocupation       String?
+  profilePicture  String
+  verified        Boolean                 @default(false)
+  email           String                  @unique
+  externalBlogs   CollaboratorsOnBlogs[]
+  password        String?
+  website         String?
+  facebook        String?
+  twitter         String?
+  instagram       String?
+  linkedin        String?
+  Blog            Blog[]
+  Post            Post[]
+  Invitation      Invitation[]
+}
+
+model Invitation {
+  id              String              @id @unique @default(cuid())
+  email           String              @unique
+  expiresIn        DateTime
+  blog            Blog                @relation(fields: [blogId], references: [id])
+  blogId          String
+  sender          User                @relation(fields: [senderId], references: [id])
+  senderId        String
 }
 
 model Blog {
-  id              String   @id @unique @default(cuid())
-  subdomain       String   @unique
-  custonDomain    String?
-  isVisible       Boolean  @default(false)
-  hasCustomRobots Boolean  @default(false)
-  robots          String?
-  created         DateTime @default(now())
-  owner           User  @relation(fields: [userId], references: [id])
-  title           String
-  users           Int     @default(0)
-  posts           Int     @default(0)
-  description     String?
-  thumbnail       String
-  keys            Json[]
-  userId          String
-  Post            Post[]
-  Views            View[]
+  id                String   @id @unique @default(cuid())
+  subdomain         String   @unique
+  custonDomain      String?
+  isVisible         Boolean  @default(false)
+  hasCustomRobots   Boolean  @default(false)
+  robots            String?
+  created           DateTime @default(now())
+  owner             User  @relation(fields: [userId], references: [id])
+  title             String
+  users             Int     @default(0)
+  posts             Int     @default(0)
+  visits            Int     @default(0)
+  description       String?
+  thumbnail         String
+  keys              Json[]
+  userId            String
+  collaborators     CollaboratorsOnBlogs[]
+  Post              Post[]
+  Views             View[]
+
+  Invitation Invitation[]
 }
 
 model Post {
-  id          String     @unique @default(cuid())
-  blog        Blog       @relation(fields: [blogId], references: [id])
-  title       String?
-  description String?
-  tags        String[]
-  category    String?
-  content     String?
-  text        String?
-  created     DateTime    @default(now())
-  published   DateTime?
-  updated     DateTime?
-  author      User        @relation(fields: [userId], references: [id])
-  status      PostStatus  @default(DRAFTED)
-  images      String[]
-  thumbnail   String?
-  slug        String?
-  views       Int         @default(0)
-  protected   Boolean     @default(false)
-  blogId      String
-  userId      String
+  id                String     @unique @default(cuid())
+  blog              Blog       @relation(fields: [blogId], references: [id])
+  title             String?
+  description       String?
+  tags              String[]
+  category          String?
+  content           String?
+  text              String?
+  created           DateTime    @default(now())
+  published         DateTime?
+  updated           DateTime?
+  author            User        @relation(fields: [userId], references: [id])
+  status            PostStatus  @default(DRAFTED)
+  images            String[]
+  thumbnail         String?
+  slug              String?
+  views             Int         @default(0)
+  protected         Boolean     @default(false)
+  blogId            String
+  userId            String
 }
 
 model View {
-  id            String      @unique @default(cuid())
-  blog          Blog        @relation(fields: [blogId], references: [id])
-  source        String      @default("direct")
+  id            String          @unique @default(cuid())
+  blog          Blog            @relation(fields: [blogId], references: [id])
+  source        String          @default("direct")
   slug          String
   country       String
   created       DateTime        @default(now())
@@ -90,6 +105,16 @@ model View {
   platform      String
   device        String
   blogId        String
+}
+
+
+model CollaboratorsOnBlogs {
+  blog          Blog        @relation(fields: [blogId], references: [id])
+  blogId        String
+  user          User        @relation(fields: [userId], references: [id])
+  userId        String
+
+  @@id([blogId, userId])
 }
 
 enum Role {

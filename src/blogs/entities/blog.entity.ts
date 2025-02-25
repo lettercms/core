@@ -16,4 +16,5 @@ export class BlogEntity implements Blog {
   userId: string;
   posts: number;
   users: number;
+  visits: number;
 }

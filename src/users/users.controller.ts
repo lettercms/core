@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Request,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserSessionEntity } from '../auth/entities/auth.entity';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -34,6 +35,19 @@ export class UsersController {
     const data = await this.usersService.findOne(session.user);
 
     return data;
+  }
+
+  @Get('members')
+  findMembers(@Request() req) {
+    const session = req.user as UserSessionEntity;
+
+    if (!session.blog) {
+      throw new UnauthorizedException(
+        'Invalid token. Token must include Blog ID',
+      );
+    }
+
+    return this.usersService.findBlogMember(session.blog);
   }
 
   @Get(':id')

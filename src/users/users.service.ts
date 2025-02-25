@@ -2,21 +2,42 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
   async create(createUserDto: CreateUserDto) {
-    if (createUserDto.password) {
-      createUserDto.password = await bcrypt.hash(createUserDto.password, 10);
+    const { blogId } = createUserDto;
+
+    if (blogId) {
+      delete createUserDto.blogId;
+    }
+
+    const data: Prisma.UserCreateInput = {
+      ...createUserDto,
+      profilePicture: `https://avatar.tobi.sh/${createUserDto.name}+${createUserDto.lastname}.svg`,
+    };
+
+    if (data.password) {
+      data.password = await bcrypt.hash(data.password, 10);
+    }
+
+    if (blogId) {
+      data.externalBlogs = {
+        create: {
+          blog: {
+            connect: {
+              id: blogId,
+            },
+          },
+        },
+      };
     }
 
     return this.prisma.user.create({
-      data: {
-        ...createUserDto,
-        profilePicture: `https://avatar.tobi.sh/${createUserDto.name}+${createUserDto.lastname}.svg`,
-      },
+      data,
     });
   }
 
@@ -29,6 +50,25 @@ export class UsersService {
       where: {
         id,
       },
+    });
+  }
+
+  async findBlogMember(blogId: string) {
+    const collabs = await this.prisma.user.findMany({
+      where: {
+        externalBlogs: {
+          some: {
+            blogId,
+          },
+        },
+      },
+    });
+
+    //TODO: Improve Data collection
+    return collabs.map((e) => {
+      delete e.password;
+
+      return e;
     });
   }
 

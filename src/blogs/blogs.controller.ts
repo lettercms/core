@@ -31,6 +31,13 @@ export class BlogsController {
     return this.blogsService.findAll(session.user);
   }
 
+  @Get('externals')
+  findExternalsBlogs(@Request() req) {
+    const session = req.user as UserSessionEntity;
+
+    return this.blogsService.findExternalsBlogs(session.user);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req) {
     const session = req.user as UserSessionEntity;

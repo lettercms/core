@@ -7,6 +7,7 @@ import { PostsModule } from './posts/posts.module';
 import { UsersModule } from './users/users.module';
 import { ViewsModule } from './views/views.module';
 import { ImagesModule } from './images/images.module';
+import { InvitationsModule } from './invitations/invitations.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ImagesModule } from './images/images.module';
     UsersModule,
     ViewsModule,
     ImagesModule,
+    InvitationsModule,
   ],
   controllers: [],
   providers: [],
