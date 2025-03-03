@@ -17,7 +17,7 @@ jobs:
       - run: docker build -t $DOCKER_USER/lettercms-core:latest .
       - run: docker push $DOCKER_USER/lettercms-core:latest
       - run: ssh-keyscan $SSH_HOST >> ~/.ssh/known_hosts
-      - run: ssh $SSH_USER@$SSH_HOST "cd lettercms && docker compose pull core && docker compose up -d"
+      - run: ssh $SSH_USER@$SSH_HOST "cd lettercms && sudo docker compose pull core && sudo docker compose up -d"
 
 workflows:
   deploy:
