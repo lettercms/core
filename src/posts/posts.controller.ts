@@ -8,10 +8,10 @@ import {
   Post,
   Query,
   Request,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserSessionEntity } from '../auth/entities/auth.entity';
 import { ApiPaginatedResponse } from '../commons/decorators/pagination';
-import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostEntity } from './entities/post.entity';
 import { PostsService } from './posts.service';
@@ -21,8 +21,16 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postsService.create(createPostDto);
+  create(@Request() req) {
+    const session = req.user as UserSessionEntity;
+
+    if (!session.blog) {
+      throw new UnauthorizedException(
+        'Invalid token. Token must include Blog ID',
+      );
+    }
+
+    return this.postsService.create(session.blog, session.user);
   }
 
   @Get()

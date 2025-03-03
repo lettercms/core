@@ -2,19 +2,19 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { PostStatus, Prisma } from '@prisma/client';
 import { createPaginator } from 'prisma-pagination';
 import { PrismaService } from '../prisma.service';
-import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostEntity } from './entities/post.entity';
 
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) {}
-  async create(createPostDto: CreatePostDto) {
+  async create(blogId: string, userId: string) {
     const now = new Date();
 
     const created = await this.prisma.post.create({
       data: {
-        ...createPostDto,
+        userId,
+        blogId,
         created: now,
         updated: now,
         views: 0,
@@ -23,7 +23,7 @@ export class PostsService {
 
     await this.prisma.blog.update({
       where: {
-        id: createPostDto.blogId,
+        id: blogId,
       },
       data: {
         posts: {
