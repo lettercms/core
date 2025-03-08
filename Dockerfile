@@ -41,6 +41,7 @@ RUN adduser --system --uid 1001 core
 COPY prisma ./
 
 COPY --from=builder --chown=core:nodejs /app/dist ./dist
+COPY --from=builder --chown=core:nodejs /app/templates ./templates
 COPY --from=deps --chown=core:nodejs /app/node_modules ./node_modules
 COPY --from=deps --chown=core:nodejs /app/package.json ./package.json
 COPY --from=deps --chown=core:nodejs /app/yarn.lock ./yarn.lock
