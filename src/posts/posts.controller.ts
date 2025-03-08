@@ -59,7 +59,9 @@ export class PostsController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postsService.remove(id);
+  remove(@Param('id') id: string, @Request() req) {
+    const session = req.user as UserSessionEntity;
+
+    return this.postsService.remove(id, session.blog);
   }
 }

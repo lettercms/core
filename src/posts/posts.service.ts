@@ -57,6 +57,9 @@ export class PostsService {
         orderBy: {
           created: 'desc',
         },
+        include: {
+          author: true,
+        },
       },
       {
         page,
@@ -118,11 +121,24 @@ export class PostsService {
     });
   }
 
-  remove(id: string) {
-    return this.prisma.post.delete({
+  async remove(blogId: string, id: string) {
+    const data = await this.prisma.post.delete({
       where: {
         id,
       },
     });
+
+    await this.prisma.blog.update({
+      where: {
+        id: blogId,
+      },
+      data: {
+        posts: {
+          decrement: 1,
+        },
+      },
+    });
+
+    return data;
   }
 }

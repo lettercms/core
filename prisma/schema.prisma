@@ -107,6 +107,13 @@ model View {
   blogId        String
 }
 
+model VerificationCodes {
+  id            String          @unique @default(cuid())
+  email         String          @unique
+  code          String
+  created       DateTime        @default(now())
+  expires       DateTime
+}
 
 model CollaboratorsOnBlogs {
   blog          Blog        @relation(fields: [blogId], references: [id])

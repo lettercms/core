@@ -20,7 +20,11 @@ export class UsersController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
+    if (createUserDto.blogId) {
+      return this.usersService.createNewMember(createUserDto);
+    }
+
+    return this.usersService.createNewUser(createUserDto);
   }
 
   @Get()
@@ -48,6 +52,11 @@ export class UsersController {
     }
 
     return this.usersService.findBlogMember(session.blog);
+  }
+
+  @Post('verify-email')
+  verifyEmail(@Body('email') email: string) {
+    return this.usersService.sendVerificationEmail(email);
   }
 
   @Get(':id')

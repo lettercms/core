@@ -13,6 +13,10 @@ interface MemberInvitationData {
   blogTitle: string;
 }
 
+interface VerificationCodeData {
+  code: string;
+}
+
 @Injectable()
 export class MailService {
   private transporter: Transporter = null;
@@ -47,7 +51,7 @@ export class MailService {
     try {
       const mailOptions = {
         from: {
-          name: 'No Reply - LetterCMS',
+          name: 'LetterCMS',
           address: process.env.ZOHO_MAIL,
         },
         to: emailOptions.to,
@@ -79,6 +83,18 @@ export class MailService {
     return this.sendMail(renderedTemplate, {
       to: email,
       subject: `Invitación a ${data.blogTitle} | LetterCMS`,
+    });
+  }
+
+  async sendVerificationCode(email: string, data: VerificationCodeData) {
+    const renderedTemplate = await this.renderEmailTemplate(
+      'verification-code',
+      data,
+    );
+
+    return this.sendMail(renderedTemplate, {
+      to: email,
+      subject: 'Verifica tu cuenta | LetterCMS',
     });
   }
 }

@@ -8,11 +8,11 @@ async function main() {
 	// create two dummy articles
 	const account = await prisma.user.upsert({
 		where: {
-			email: 'davidsdevel@gmail.com',
+			email: 'lettercms@gmail.com',
 		},
 		update: {},
 		create: {
-			email: 'davidsdevel@gmail.com',
+			email: 'lettercms@gmail.com',
 			name: 'David',
 			password: await bcrypt.hash('1234', 10),
 			lastname: 'Gonzalez',
@@ -33,53 +33,6 @@ async function main() {
 			userId: account.id,
 			visits: 1,
 			users: 2
-		},
-	});
-
-	await prisma.user.upsert({
-		where: {
-			email: 'lettercms@gmail.com',
-		},
-		update: {},
-		create: {
-			email: 'lettercms@gmail.com',
-			name: 'Juan',
-			lastname: 'Smith',
-			password: await bcrypt.hash('1234', 10),
-			profilePicture: 'https://avatar.tobi.sh/Juan+Smith.svg',
-			externalBlogs: {
-				create: [
-					{
-						blog: {
-							connect: {
-								id: blog.id,
-							},
-						}
-					}
-				]
-			}
-		},
-	});
-
-	await prisma.post.create({
-		data: {
-			userId: account.id,
-			blogId: blog.id,
-			views: 1,
-			title: 'Demo Post',
-			content: '<h1>This is a demo post</h1>',
-			status: 'PUBLISHED',
-			slug: 'demo-post',
-			tags: ['example'],
-		},
-	});
-
-	await prisma.invitation.create({
-		data: {
-			email: 'djgm1206@gmail.com',
-			blogId: blog.id,
-			senderId: account.id,
-			expiresIn: new Date(Date.now() + (1000 * 60 * 60 * 24 * 365)),
 		},
 	});
 

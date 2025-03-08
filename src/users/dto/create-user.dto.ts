@@ -14,5 +14,8 @@ export class CreateUserDto {
   password: string;
 
   @ApiProperty()
-  blogId: string;
+  blogId?: string;
+
+  @ApiProperty()
+  verificationCode?: string;
 }
