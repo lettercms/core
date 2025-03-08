@@ -86,7 +86,7 @@ export class PostsService {
     });
   }
 
-  update(id: string, updatePostDto: UpdatePostDto) {
+  async update(id: string, updatePostDto: UpdatePostDto) {
     const now = new Date();
 
     const data = {
@@ -98,11 +98,29 @@ export class PostsService {
     if (updatePostDto.status === 'PUBLISHED') {
       data.published = now;
     }
-    return this.prisma.post.update({
+
+    const updatedData = await this.prisma.post.update({
       where: {
         id,
       },
       data,
+    });
+
+    //TODO: Improve revalidation service
+    if (process.env.DAVIDSDEVEL_URL) {
+      this.revalidateData(updatedData);
+    }
+
+    return updatedData;
+  }
+
+  revalidateData(data) {
+    return fetch(`${process.env.DAVIDSDEVEL_URL}/api/revalidation/post`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     });
   }
 
@@ -138,6 +156,11 @@ export class PostsService {
         },
       },
     });
+
+    //TODO: Improve revalidation service
+    if (process.env.DAVIDSDEVEL_URL) {
+      this.revalidateData(data);
+    }
 
     return data;
   }

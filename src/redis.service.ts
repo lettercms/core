@@ -1,13 +1,11 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { createClient } from 'redis';
 
-const client = createClient({
-  url: process.env.REDIS_URL,
-});
-
 @Injectable()
 export class RedisService implements OnModuleInit {
-  private redis = client;
+  private redis = createClient({
+    url: process.env.REDIS_URL,
+  });
 
   async onModuleInit() {
     await this.redis.connect();
