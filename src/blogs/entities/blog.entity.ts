@@ -5,7 +5,7 @@ export class BlogEntity implements Blog {
   id: string;
   subdomain: string;
   created: Date;
-  custonDomain: string;
+  customDomain: string;
   description: string;
   hasCustomRobots: boolean;
   isVisible: boolean;
