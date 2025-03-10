@@ -34,6 +34,9 @@ FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+#ENV NEW_RELIC_NO_CONFIG_FILE=true
+#ENV NEW_RELIC_DISTRIBUTED_TRACING_ENABLED=true
+#ENV NEW_RELIC_LOG=stdout
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 core
@@ -42,6 +45,7 @@ COPY prisma ./
 
 COPY --from=builder --chown=core:nodejs /app/dist ./dist
 COPY --from=builder --chown=core:nodejs /app/templates ./templates
+COPY --from=builder --chown=core:nodejs /app/newrelic.js ./newrelic.js
 COPY --from=deps --chown=core:nodejs /app/node_modules ./node_modules
 COPY --from=deps --chown=core:nodejs /app/package.json ./package.json
 COPY --from=deps --chown=core:nodejs /app/yarn.lock ./yarn.lock
