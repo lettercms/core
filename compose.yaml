@@ -1,6 +1,6 @@
 services:
   core:
-    image: davidsdevel/lettercms-core:dev
+    image: davidsdevel/lettercms-core:latest
     restart: always
     ports:
       - "3000:3000"
@@ -26,5 +26,3 @@ services:
       - SMTP_PASSWORD
       - SMTP_HOST
       - SMTP_PORT
-      
-
