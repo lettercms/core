@@ -139,7 +139,7 @@ export class PostsService {
     });
   }
 
-  async remove(blogId: string, id: string) {
+  async remove(id: string, blogId: string) {
     const data = await this.prisma.post.delete({
       where: {
         id,

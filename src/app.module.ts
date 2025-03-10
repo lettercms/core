@@ -8,20 +8,26 @@ import { UsersModule } from './users/users.module';
 import { ViewsModule } from './views/views.module';
 import { ImagesModule } from './images/images.module';
 import { InvitationsModule } from './invitations/invitations.module';
+import newrelicFormatter from '@newrelic/pino-enricher';
 
 @Module({
   imports: [
     LoggerModule.forRoot({
       pinoHttp: {
-        customProps: () => ({
-          context: 'HTTP',
-        }),
+        level: process.env.NODE_ENV !== 'production' ? 'debug' : 'info',
         transport: {
-          target: 'pino-pretty',
+          target: 'pino-pretty', // Optional: For pretty-printing in development
           options: {
             singleLine: true,
           },
         },
+        formatters: {
+          level: (label) => {
+            return { level: label };
+          },
+        },
+        redact: ['req.headers.authorization', 'res.headers.authorization'],
+        mixin: newrelicFormatter,
       },
     }),
     ConfigModule.forRoot({

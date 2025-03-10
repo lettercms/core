@@ -25,7 +25,7 @@ export class UnsplashService {
       throw new NotFoundException('No images found');
     }
 
-    const mapped = photos.response.results.map((e) => {
+    const data = photos.response.results.map((e) => {
       return {
         url: e.urls.regular,
         thumbnail: e.urls.thumb,
@@ -41,6 +41,10 @@ export class UnsplashService {
       };
     });
 
-    return mapped;
+    return {
+      data,
+      pages: photos.response.total_pages,
+      total: photos.response.total,
+    };
   }
 }

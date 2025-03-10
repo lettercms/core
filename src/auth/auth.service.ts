@@ -16,7 +16,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('No credentials found');
     }
 
     const matchPassword = await bcrypt.compare(
@@ -25,7 +25,7 @@ export class AuthService {
     );
 
     if (!matchPassword) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException('No credentials found');
     }
 
     return {
