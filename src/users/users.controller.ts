@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -28,21 +29,21 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query() query) {
+    return this.usersService.findAll(query);
   }
 
   @Get('profile')
-  async getProfile(@Request() req) {
+  async getProfile(@Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
-    const data = await this.usersService.findOne(session.user);
+    const data = await this.usersService.findOne(session.user, query);
 
     return data;
   }
 
   @Get('members')
-  findMembers(@Request() req) {
+  findMembers(@Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
     if (!session.blog) {
@@ -51,7 +52,7 @@ export class UsersController {
       );
     }
 
-    return this.usersService.findBlogMember(session.blog);
+    return this.usersService.findBlogMembers(session.blog, query);
   }
 
   @Post('verify-email')
@@ -60,8 +61,8 @@ export class UsersController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.usersService.findOne(id);
+  findOne(@Param('id') id: string, @Query() query) {
+    return this.usersService.findOne(id, query);
   }
 
   @Patch(':id')

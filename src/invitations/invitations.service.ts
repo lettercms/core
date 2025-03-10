@@ -1,24 +1,25 @@
 import { Injectable } from '@nestjs/common';
 import { MailService } from 'src/mail.service';
+import { ModelManagerService } from 'src/modelManager.service';
 import { PrismaService } from 'src/prisma.service';
+import { InvitationEntity } from './entities/invitation.entity';
+import { BlogEntity } from 'src/blogs/entities/blog.entity';
 
 @Injectable()
 export class InvitationsService {
   constructor(
     private prisma: PrismaService,
     private mail: MailService,
+    private modelManager: ModelManagerService,
   ) {}
   async inviteBlogMember(email: string, blogId: string, senderId: string) {
     const expireIn = Date.now() + 1000 * 60 * 60 * 24; //Expires in 1 day
 
-    const blog = await this.prisma.blog.findUnique({
+    const blog = await this.modelManager.findOne<BlogEntity>(this.prisma.blog, {
       where: {
         id: blogId,
       },
-      select: {
-        id: true,
-        title: true,
-      },
+      select: 'id,title',
     });
 
     if (!blog) {
@@ -41,18 +42,15 @@ export class InvitationsService {
     });
   }
 
-  findOne(id: string) {
-    return this.prisma.invitation.findUnique({
+  findOne(id: string, query: Record<string, any>) {
+    return this.modelManager.findOne<InvitationEntity>(this.prisma.invitation, {
       where: {
         id,
         expiresIn: {
           gt: new Date(),
         },
       },
-      include: {
-        sender: true,
-        blog: true,
-      },
+      ...query,
     });
   }
 

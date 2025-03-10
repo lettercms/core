@@ -2,10 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import { CreateBlogDto } from './dto/create-blog.dto';
 import { UpdateBlogDto } from './dto/update-blog.dto';
+import { ModelManagerService } from 'src/modelManager.service';
+import { BlogEntity } from './entities/blog.entity';
 
 @Injectable()
 export class BlogsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private modelManager: ModelManagerService,
+  ) {}
   create(createBlogDto: CreateBlogDto, userId: string) {
     return this.prisma.blog.create({
       data: {
@@ -19,16 +24,17 @@ export class BlogsService {
     });
   }
 
-  findAll(userId: string) {
-    return this.prisma.blog.findMany({
+  findAll(userId: string, query: Record<string, any>) {
+    return this.modelManager.paginate<BlogEntity>(this.prisma.blog, {
       where: {
         userId,
       },
+      ...query,
     });
   }
 
-  findExternalsBlogs(userId: string) {
-    return this.prisma.blog.findMany({
+  findExternalsBlogs(userId: string, query: Record<string, any>) {
+    return this.modelManager.paginate<BlogEntity>(this.prisma.blog, {
       where: {
         collaborators: {
           some: {
@@ -36,15 +42,17 @@ export class BlogsService {
           },
         },
       },
+      ...query,
     });
   }
 
-  findOne(id: string, userId: string) {
-    return this.prisma.blog.findUnique({
+  findOne(id: string, userId: string, query: Record<string, any>) {
+    return this.modelManager.findOne<BlogEntity>(this.prisma.blog, {
       where: {
         id,
         userId,
       },
+      ...query,
     });
   }
 

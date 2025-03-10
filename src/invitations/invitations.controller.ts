@@ -6,6 +6,7 @@ import {
   Param,
   Request,
   UnauthorizedException,
+  Query,
 } from '@nestjs/common';
 import { InvitationsService } from './invitations.service';
 import { UserSessionEntity } from 'src/auth/entities/auth.entity';
@@ -38,7 +39,7 @@ export class InvitationsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.invitationsService.findOne(id);
+  findOne(@Param('id') id: string, @Query() query) {
+    return this.invitationsService.findOne(id, query);
   }
 }

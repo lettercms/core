@@ -35,22 +35,17 @@ export class PostsController {
 
   @Get()
   @ApiPaginatedResponse(PostEntity)
-  findAll(
-    @Request() req,
-    @Query('page') page,
-    @Query('limit') limit,
-    @Query('status') status,
-  ) {
+  findAll(@Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
-    return this.postsService.findAll(session.blog, limit, page, status);
+    return this.postsService.findAll(session.blog, query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
+  findOne(@Param('id') id: string, @Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
-    return this.postsService.findOne(id, session.blog);
+    return this.postsService.findOne(id, session.blog, query);
   }
 
   @Patch(':id')

@@ -1,13 +1,16 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { PostStatus, Prisma } from '@prisma/client';
-import { createPaginator } from 'prisma-pagination';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma.service';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { PostEntity } from './entities/post.entity';
+import { ModelManagerService } from 'src/modelManager.service';
 
 @Injectable()
 export class PostsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private modelManager: ModelManagerService,
+  ) {}
   async create(blogId: string, userId: string) {
     const now = new Date();
 
@@ -35,7 +38,7 @@ export class PostsService {
     return created;
   }
 
-  findAll(blogId?: string, take = 10, page = 1, status?: PostStatus) {
+  findAll(blogId: string, query: Record<string, any>) {
     if (!blogId) {
       throw new UnauthorizedException();
     }
@@ -44,31 +47,19 @@ export class PostsService {
       blogId,
     };
 
-    if (status) {
-      where.status = status;
+    if (query.status) {
+      where.status = query.status;
     }
 
-    const paginate = createPaginator({ perPage: take });
-
-    return paginate<PostEntity, Prisma.PostFindManyArgs>(
-      this.prisma.post,
-      {
-        where,
-        orderBy: {
-          created: 'desc',
-        },
-        include: {
-          author: true,
-        },
-      },
-      {
-        page,
-      },
-    );
+    return this.modelManager.paginate<PostEntity>(this.prisma.post, {
+      where,
+      orderBy: query.orderBy || 'created',
+      ...query,
+    });
   }
 
-  findOne(id: string, blogId: string) {
-    return this.prisma.post.findFirst({
+  findOne(id: string, blogId: string, query: Record<string, any>) {
+    return this.modelManager.findOne<PostEntity>(this.prisma.post, {
       where: {
         OR: [
           {
@@ -80,9 +71,7 @@ export class PostsService {
           },
         ],
       },
-      include: {
-        author: true,
-      },
+      ...query,
     });
   }
 
@@ -125,7 +114,9 @@ export class PostsService {
   }
 
   async incrementView(blog: string, slug: string) {
-    const { id } = await this.findOne(slug, blog);
+    const { id } = await this.findOne(slug, blog, {
+      select: 'id',
+    });
 
     return this.prisma.post.update({
       where: {

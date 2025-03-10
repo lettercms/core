@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   Request,
 } from '@nestjs/common';
 import { UserSessionEntity } from '../auth/entities/auth.entity';
@@ -25,24 +26,24 @@ export class BlogsController {
   }
 
   @Get()
-  findAll(@Request() req) {
+  findAll(@Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
-    return this.blogsService.findAll(session.user);
+    return this.blogsService.findAll(session.user, query);
   }
 
   @Get('externals')
-  findExternalsBlogs(@Request() req) {
+  findExternalsBlogs(@Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
-    return this.blogsService.findExternalsBlogs(session.user);
+    return this.blogsService.findExternalsBlogs(session.user, query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string, @Request() req) {
+  findOne(@Param('id') id: string, @Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
-    return this.blogsService.findOne(id, session.user);
+    return this.blogsService.findOne(id, session.user, query);
   }
 
   @Patch(':id')

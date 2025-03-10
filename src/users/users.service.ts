@@ -6,12 +6,15 @@ import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
 import { Prisma } from '@prisma/client';
 import { MailService } from 'src/mail.service';
+import { ModelManagerService } from 'src/modelManager.service';
+import { UserEntity } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
     private mail: MailService,
+    private modelManager: ModelManagerService,
   ) {}
   private async create(data: Prisma.UserCreateInput) {
     const creationData: Prisma.UserCreateInput = {
@@ -91,35 +94,58 @@ export class UsersService {
     return this.create(data);
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async findAll(query: Record<string, any>) {
+    const users = await this.modelManager.paginate<UserEntity>(
+      this.prisma.user,
+      query,
+    );
+
+    return {
+      data: users.data.map((e) => {
+        delete e.password;
+
+        return e;
+      }),
+      ...users,
+    };
   }
 
-  findOne(id: string) {
-    return this.prisma.user.findUnique({
+  async findOne(id: string, query: Record<string, any>) {
+    const user = await this.modelManager.findOne<UserEntity>(this.prisma.user, {
       where: {
         id,
       },
+      ...query,
     });
+
+    delete user.password;
+
+    return user;
   }
 
-  async findBlogMember(blogId: string) {
-    const collabs = await this.prisma.user.findMany({
-      where: {
-        externalBlogs: {
-          some: {
-            blogId,
+  async findBlogMembers(blogId: string, query: Record<string, any>) {
+    const members = await this.modelManager.paginate<UserEntity>(
+      this.prisma.user,
+      {
+        where: {
+          externalBlogs: {
+            some: {
+              blogId,
+            },
           },
         },
+        ...query,
       },
-    });
+    );
 
-    //TODO: Improve Data collection
-    return collabs.map((e) => {
-      delete e.password;
+    return {
+      data: members.data.map((e) => {
+        delete e.password;
 
-      return e;
-    });
+        return e;
+      }),
+      ...members,
+    };
   }
 
   async sendVerificationEmail(email: string) {
