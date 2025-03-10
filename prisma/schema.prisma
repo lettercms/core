@@ -48,7 +48,7 @@ model Invitation {
 model Blog {
   id                String   @id @unique @default(cuid())
   subdomain         String   @unique
-  custonDomain      String?
+  customDomain      String?
   isVisible         Boolean  @default(false)
   hasCustomRobots   Boolean  @default(false)
   robots            String?
