@@ -1,17 +1,30 @@
 services:
   core:
-    depends_on:
-      redis:
-        condition: service_started
     image: davidsdevel/lettercms-core:dev
     restart: always
     ports:
-      - "3002:3000"
+      - "3000:3000"
     environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
       - DATABASE_URL
       - JWT_SECRET
-  redis:
-    image: redis:alpine
-    restart: always
+      - LETTERCMS_URL
+      - UPLOAD_URL
+      
+      #Credentials to enable file searching
+      - UNSPLASH_API_KEY
+      - UNSPLASH_SECRET_KEY
+      
+      #Credentials to enable file manager
+      - AWS_ENDPOINT
+      - AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY
+      - AWS_BUCKET
+      - AWS_REGION
+
+      #Credentials to enable email service
+      - SMTP_MAIL
+      - SMTP_PASSWORD
+      - SMTP_HOST
+      - SMTP_PORT
+      
+

@@ -24,12 +24,12 @@ export class MailService {
 
   constructor() {
     this.transporter = createTransport({
-      host: 'smtp.zoho.com',
-      port: 465,
+      host: process.env.SMTP_MAIL,
+      port: parseInt(process.env.SMTP_PORT),
       secure: true,
       auth: {
-        user: process.env.ZOHO_MAIL,
-        pass: process.env.ZOHO_PASSWORD,
+        user: process.env.SMTP_MAIL,
+        pass: process.env.SMTP_PASSWORD,
       },
     });
   }
