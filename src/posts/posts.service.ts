@@ -78,13 +78,23 @@ export class PostsService {
   async update(id: string, updatePostDto: UpdatePostDto) {
     const now = new Date();
 
+    const actualPostState = await this.modelManager.findOne<PostEntity>(
+      this.prisma.post,
+      {
+        where: {
+          id,
+        },
+        select: 'published',
+      },
+    );
+
     const data = {
       ...updatePostDto,
       updated: now,
       published: null,
     };
 
-    if (updatePostDto.status === 'PUBLISHED') {
+    if (updatePostDto.status === 'PUBLISHED' && !actualPostState.published) {
       data.published = now;
     }
 
