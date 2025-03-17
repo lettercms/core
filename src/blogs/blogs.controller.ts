@@ -47,12 +47,28 @@ export class BlogsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBlogDto: UpdateBlogDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateBlogDto: UpdateBlogDto,
+    @Request() req,
+  ) {
+    const session = req.user as UserSessionEntity;
+
+    if (!session) {
+      throw new Error('Unauthorized');
+    }
+
     return this.blogsService.update(id, updateBlogDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string, @Request() req) {
+    const session = req.user as UserSessionEntity;
+
+    if (!session) {
+      throw new Error('Unauthorized');
+    }
+
     return this.blogsService.remove(id);
   }
 }

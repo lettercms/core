@@ -78,7 +78,27 @@ export class BlogsService {
     });
   }
 
-  remove(id: string) {
-    return `This action removes a #${id} blog`;
+  async remove(id: string) {
+    const blog = await this.prisma.blog.delete({
+      where: {
+        id,
+      },
+    });
+    await this.prisma.post.deleteMany({
+      where: {
+        blogId: id,
+      },
+    });
+    await this.prisma.view.deleteMany({
+      where: {
+        blogId: id,
+      },
+    });
+    await this.prisma.collaboratorsOnBlogs.deleteMany({
+      where: {
+        blogId: id,
+      },
+    });
+    return blog;
   }
 }
