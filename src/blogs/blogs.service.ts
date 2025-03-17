@@ -49,8 +49,15 @@ export class BlogsService {
   findOne(id: string, userId: string, query: Record<string, any>) {
     return this.modelManager.findOne<BlogEntity>(this.prisma.blog, {
       where: {
-        id,
-        userId,
+        OR: [
+          {
+            id,
+            userId,
+          },
+          {
+            subdomain: id,
+          },
+        ],
       },
       ...query,
     });

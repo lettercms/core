@@ -38,13 +38,29 @@ export class PostsService {
     return created;
   }
 
-  findAll(blogId: string, query: Record<string, any>) {
+  async findAll(blogId: string, query: Record<string, any>) {
     if (!blogId) {
       throw new UnauthorizedException();
     }
 
+    const blog = await this.prisma.blog.findFirst({
+      where: {
+        OR: [
+          {
+            id: blogId,
+          },
+          {
+            subdomain: blogId,
+          },
+        ],
+      },
+      select: {
+        id: true,
+      },
+    });
+
     const where: Prisma.PostWhereInput = {
-      blogId,
+      blogId: blog.id,
     };
 
     if (query.status) {
@@ -58,7 +74,23 @@ export class PostsService {
     });
   }
 
-  findOne(id: string, blogId: string, query: Record<string, any>) {
+  async findOne(id: string, blogId: string, query: Record<string, any>) {
+    const blog = await this.prisma.blog.findFirst({
+      where: {
+        OR: [
+          {
+            id: blogId,
+          },
+          {
+            subdomain: blogId,
+          },
+        ],
+      },
+      select: {
+        id: true,
+      },
+    });
+
     return this.modelManager.findOne<PostEntity>(this.prisma.post, {
       where: {
         OR: [
@@ -67,7 +99,7 @@ export class PostsService {
           },
           {
             slug: id,
-            blogId,
+            blogId: blog.id,
           },
         ],
       },

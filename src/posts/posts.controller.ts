@@ -38,14 +38,18 @@ export class PostsController {
   findAll(@Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
-    return this.postsService.findAll(session.blog, query);
+    return this.postsService.findAll(session.blog || session.subdomain, query);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string, @Request() req, @Query() query) {
     const session = req.user as UserSessionEntity;
 
-    return this.postsService.findOne(id, session.blog, query);
+    return this.postsService.findOne(
+      id,
+      session.blog || session.subdomain,
+      query,
+    );
   }
 
   @Patch(':id')
