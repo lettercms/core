@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { MailService } from 'src/mail.service';
 import { ModelManagerService } from 'src/modelManager.service';
 import { PrismaService } from 'src/prisma.service';
@@ -32,7 +32,7 @@ export class InvitationsService {
       id: blog.id,
     });
 
-    return this.prisma.invitation.create({
+    const invitation = await this.prisma.invitation.create({
       data: {
         senderId,
         email,
@@ -40,18 +40,47 @@ export class InvitationsService {
         expiresIn: new Date(expireIn),
       },
     });
+
+    console.log(invitation);
+
+    return invitation;
   }
 
-  findOne(id: string, query: Record<string, any>) {
-    return this.modelManager.findOne<InvitationEntity>(this.prisma.invitation, {
-      where: {
-        id,
-        expiresIn: {
-          gt: new Date(),
+  async findOne(id: string, query: Record<string, any>) {
+    const invitaiton = await this.modelManager.findOne<InvitationEntity>(
+      this.prisma.invitation,
+      {
+        where: {
+          id,
+          expiresIn: {
+            gt: new Date(),
+          },
         },
+        ...query,
       },
-      ...query,
+    );
+
+    const existingUser = await this.prisma.user.findFirst({
+      where: {
+        email: invitaiton.email,
+      },
+      select: {
+        id: true,
+      },
     });
+
+    if (!invitaiton) {
+      throw new NotFoundException('Invitation not found');
+    }
+
+    if (existingUser) {
+      return {
+        ...invitaiton,
+        userId: existingUser.id,
+      };
+    }
+
+    return invitaiton;
   }
 
   remove(id: number) {

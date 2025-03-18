@@ -34,6 +34,12 @@ export class BlogsService {
   }
 
   findExternalsBlogs(userId: string, query: Record<string, any>) {
+    this.modelManager
+      .paginate<BlogEntity>(this.prisma.collaboratorsOnBlogs, {
+        where: {},
+      })
+      .then(console.log);
+
     return this.modelManager.paginate<BlogEntity>(this.prisma.blog, {
       where: {
         collaborators: {

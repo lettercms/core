@@ -91,7 +91,15 @@ export class UsersService {
       profilePicture: '',
     };
 
-    return this.create(data);
+    const user = await this.create(data);
+
+    await this.prisma.invitation.delete({
+      where: {
+        email: user.email,
+      },
+    });
+
+    return user;
   }
 
   async findAll(query: Record<string, any>) {
@@ -182,15 +190,37 @@ export class UsersService {
     return randomBytes(4).toString('hex');
   }
   async update(id: string, updateUserDto: UpdateUserDto) {
+    const { externalBlog } = updateUserDto;
+
+    if (externalBlog) {
+      delete updateUserDto.externalBlog;
+    }
+
+    const data: Prisma.UserUpdateInput = {
+      ...updateUserDto,
+    };
+
     if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+      data.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    if (externalBlog) {
+      data.externalBlogs = {
+        create: {
+          blog: {
+            connect: {
+              id: externalBlog,
+            },
+          },
+        },
+      };
     }
 
     return this.prisma.user.update({
       where: {
         id,
       },
-      data: updateUserDto,
+      data,
     });
   }
 
