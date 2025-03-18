@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { createTransport, type Transporter } from 'nodemailer';
 import { renderFile } from 'ejs';
 import { join } from 'node:path';
+import { ConfigService } from '@nestjs/config';
 
 interface EmailOptions {
   to: string;
@@ -22,14 +23,14 @@ export class MailService {
   private transporter: Transporter = null;
   private templatePath = join(process.cwd(), 'templates');
 
-  constructor() {
+  constructor(private config: ConfigService) {
     this.transporter = createTransport({
-      host: process.env.SMTP_MAIL,
-      port: parseInt(process.env.SMTP_PORT),
+      host: this.config.get<string>('SMTP_HOST'),
+      port: parseInt(this.config.get<string>('SMTP_PORT')),
       secure: true,
       auth: {
-        user: process.env.SMTP_MAIL,
-        pass: process.env.SMTP_PASSWORD,
+        user: this.config.get<string>('SMTP_MAIL'),
+        pass: this.config.get<string>('SMTP_PASSWORD'),
       },
     });
   }
@@ -52,7 +53,7 @@ export class MailService {
       const mailOptions = {
         from: {
           name: 'LetterCMS',
-          address: process.env.ZOHO_MAIL,
+          address: this.config.get<string>('SMTP_MAIL'),
         },
         to: emailOptions.to,
         subject: emailOptions.subject,
@@ -63,6 +64,7 @@ export class MailService {
 
       return data;
     } catch (err) {
+      console.error(err);
       //TODO: Handle Errors
 
       throw err;
